@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "YOUR_FIGMA_TOKEN_HERE"
+      },
+      "autoApprove": [
+        "get_screenshot",
+        "get_metadata",
+        "get_design_context",
+        "get_variable_defs",
+        "use_figma",
+        "search_design_system",
+        "get_libraries",
+        "whoami"
+      ]
+    }
+  }
+}
