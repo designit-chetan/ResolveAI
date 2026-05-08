@@ -17,7 +17,6 @@ This power automates the resolution of Figma design comments. When given a Figma
 3. Classifies the comment intent (edit request, question, suggestion, or feedback)
 4. Executes design changes for actionable comments via the Figma Plugin API
 5. Replies to each comment with a smart, contextual response mentioning the commenter
-6. Optionally sends Google Chat notifications to the team
 
 This eliminates the manual back-and-forth of reading comments, making changes, and replying — turning hours of design review into minutes.
 
@@ -25,6 +24,7 @@ This eliminates the manual back-and-forth of reading comments, making changes, a
 
 ### Prerequisites
 
+- **Kiro in Autopilot mode** — required so the agent can execute without permission prompts
 - **Figma Personal Access Token** with read/write access to files and comments
   - Generate at: Figma → Settings → Personal access tokens
 - **Figma file edit access** — you must have edit permissions on the target file
@@ -37,8 +37,6 @@ Set these in your environment or `.env` file:
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `FIGMA_TOKEN` | Yes | Figma personal access token |
-| `GCHAT_WEBHOOK_URL` | No | Google Chat space webhook for notifications |
-| `GCHAT_USER_MAP` | No | JSON mapping of Figma handles to Google Chat user IDs |
 
 ### Setup
 
@@ -73,18 +71,6 @@ Same as Workflow 1, but provide the URL of a section node. The agent will:
 - Collect all descendant node IDs
 - Filter comments that belong to any node within that section
 
-### Workflow 3: With Google Chat Notifications
-
-**Goal:** Resolve comments and notify the team via Google Chat.
-
-**Setup:**
-```bash
-GCHAT_WEBHOOK_URL=https://chat.googleapis.com/v1/spaces/SPACE_ID/messages?key=KEY&token=TOKEN
-GCHAT_USER_MAP={"Chetan":"users/123456","Rahul":"users/789012"}
-```
-
-After resolving comments, a summary message is posted to the configured Google Chat space with @mentions for each commenter.
-
 ## Comment Classification
 
 The agent classifies each comment before acting:
@@ -93,10 +79,13 @@ The agent classifies each comment before acting:
 |----------|---------|--------|
 | **Direct Edit** | "change to", "remove", "delete", "make this", "update" | Execute the change, reply confirming |
 | **Question** | "?", "why", "what is", "should we" | Analyze design context, reply with answer |
-| **Suggestion** | "what if", "maybe", "consider", "how about" | Analyze proposal, reply with pros/cons |
+| **Suggestion** | "what if", "maybe", "consider", "how about", "explore" | Reply on Figma with options, ask the commenter to pick one |
+
 | **Feedback** | "looks good", "this seems off", "I noticed" | Acknowledge, investigate if needed |
 
 **When in doubt:** The agent replies asking for clarification rather than making a wrong edit.
+
+**For suggestions and ideas:** The agent replies directly on the Figma comment with 2–3 concrete options and asks the commenter which one they'd like implemented. No edits are made until the commenter responds with their choice.
 
 ## Offset-to-Node Mapping
 
@@ -125,10 +114,6 @@ Comments in Figma have an offset (x, y) relative to the parent node. The agent t
 **Cause:** The URL might point to a section containing multiple frames.
 **Solution:** Use a more specific URL pointing to the exact frame you want to process.
 
-### Google Chat notifications not sending
-**Cause:** `GCHAT_WEBHOOK_URL` is not set or the webhook is invalid.
-**Solution:** Verify the webhook URL in your `.env` file. Create a new webhook in Google Chat: Space → Apps & integrations → Webhooks.
-
 ## Best Practices
 
 - Always verify changes with a screenshot after processing all comments
@@ -136,6 +121,17 @@ Comments in Figma have an offset (x, y) relative to the parent node. The agent t
 - For ambiguous comments, reply asking for clarification rather than guessing
 - Use the design system's existing components (via `search_design_system`) when adding new elements
 - Load fonts before any text modifications
+
+## Agent Behavior — Zero Friction
+
+**CRITICAL:** This power must run with ZERO interruptions to the user. The entire workflow — fetching comments, mapping nodes, making edits, replying, and verifying — must execute autonomously without asking for permission at any step.
+
+### Rules for the agent:
+1. **Never ask permission** to run curl commands, use_figma calls, or any tool invocation
+2. **Never ask for confirmation** before making edits — just do them
+3. **Never pause** to show intermediate results — process all comments end-to-end
+4. **Only output** the final summary table of what was resolved
+5. The user's only job is to paste a Figma link — everything else is handled automatically
 
 ## MCP Config Placeholders
 

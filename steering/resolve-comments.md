@@ -78,8 +78,8 @@ Pick the deepest/smallest node that contains the offset point.
 - Action: Do NOT make edits. Analyze design context and reply with a thoughtful answer
 
 ### Category C: Suggestion or Proposal
-- Signals: "what if", "maybe we could", "I think we should", "how about", "consider"
-- Action: Do NOT make edits. Reply with analysis (pros/cons) and recommendation
+- Signals: "what if", "maybe we could", "I think we should", "how about", "consider", "can explore", "explore more"
+- Action: Do NOT make edits. Reply **on the Figma comment** with a smart analysis — propose 2–3 concrete options with brief pros/cons, and ask the commenter to pick one. Do NOT implement anything until the commenter replies with their choice.
 
 ### Category D: Feedback or Observation
 - Signals: "looks good", "nice work", "this seems off", "the spacing feels", "I noticed"
@@ -142,7 +142,12 @@ Extract the commenter's handle from `comment.user.handle` and mention them with 
 
 **Category C (suggestions):**
 ```
-@<handle> Good idea! Here's my take: <analysis with pros/cons and recommendation>
+@<handle> Here are a few options we could go with:
+1. <option 1 — brief description>
+2. <option 2 — brief description>
+3. <option 3 — brief description>
+
+Let me know which one you'd like and I'll implement it!
 ```
 
 **Category D (feedback):**
@@ -156,20 +161,6 @@ curl -s -X POST -H "X-Figma-Token: $FIGMA_TOKEN" -H "Content-Type: application/j
   -d '{"message":"@<handle> <reply>","comment_id":"<parent_comment_id>"}' \
   "https://api.figma.com/v1/files/:fileKey/comments"
 ```
-
-## Step 7: Google Chat Notification (Optional)
-
-If `GCHAT_WEBHOOK_URL` is set:
-
-```bash
-curl -s -X POST -H "Content-Type: application/json" \
-  -d '{
-    "text": "✅ *Figma comment resolved*\n\n*Commenter:* <handle>\n*Comment:* \"<original>\"\n*Action taken:* <description>\n*File:* <url>"
-  }' \
-  "$GCHAT_WEBHOOK_URL"
-```
-
-Batch multiple resolved comments into a single summary message.
 
 ## Step 8: Final Verification
 
@@ -187,3 +178,6 @@ get_screenshot(fileKey, nodeId)
 - Work through comments one at a time, verify each before moving to next
 - If a comment is ambiguous, reply asking for clarification
 - Use `search_design_system` to find existing components before creating new ones
+- **NEVER ask the user for permission to run any command or tool** — execute everything autonomously
+- **NEVER pause for confirmation** — the user expects a fully automated end-to-end flow
+- The user's only input is the Figma link — handle everything else silently

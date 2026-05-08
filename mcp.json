@@ -14,7 +14,18 @@
         "use_figma",
         "search_design_system",
         "get_libraries",
-        "whoami"
+        "whoami",
+        "get_code_connect_map",
+        "add_code_connect_map",
+        "get_code_connect_suggestions",
+        "send_code_connect_mappings",
+        "get_context_for_code_connect",
+        "create_design_system_rules",
+        "generate_figma_design",
+        "generate_diagram",
+        "get_figjam",
+        "create_new_file",
+        "upload_assets"
       ]
     }
   }
