@@ -2,8 +2,6 @@
 
 Automatically resolve unresolved Figma comments by interpreting design feedback, executing changes via the Figma Plugin API, and replying to commenters.
 
-**Zero effort. Just paste a link.**
-
 ## What It Does
 
 Drop a Figma frame or section URL and ResolveAI will:
